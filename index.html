@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>HTML Data Viewer by qcl</title>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+</head>
+<body>
+<h1>HTML Final Project Data Viewer</h1>
+
+<h2>Image <span id="ans"></span></h2>
+<div>
+<canvas id="cv" width="105" height="122">
+</canvas>
+</div>
+<hr />
+<h2>Input</h2>
+<h3>輸入資料行數</h3>
+<ul>
+    <li>Train data line #<input type="number" id="train_line" />
+<button id="get_train">取得並繪圖</button></li>
+    <li>Test1 data line #<input type="number" id="test1_line" />
+<button id="get_test1">取得並繪圖</button></li>
+</ul>
+<h3>或直接輸入資料</h3>
+<textarea id="dataline">
+</textarea>
+<button id="render">Render</button>
+<hr />
+<h2>Data line</h2>
+<p id="line"></p>
+
+<script>
+
+$(function(){
+   
+    var canvas = $("#cv")[0];
+    var cv = canvas.getContext("2d");
+
+    var anwsers = ["鼠","牛","虎","兔","龍","蛇","馬","羊","猴","雞","狗","豬"];
+
+    var err = function(){
+        $("#ans").html("N/A");
+        $("#line").html("N/A");
+    };
+
+    var draw = function(dataline){
+        $("#line").html(dataline);
+        var data = dataline.split(" ");
+        cv.fillStyle="#FFF"; 
+        cv.fillRect(0,0,105,122);
+    
+        for(var j in data){
+            if(j>0){
+                var d = data[j].split(":");
+                var key = parseInt(d[0],10);
+                var value = d[1];
+
+                var row = Math.floor((key-1)/105);
+                var col = (key-1)%105;
+
+                cv.fillStyle="rgba(0,0,0,"+value+")";
+                cv.fillRect(col-1,row-1,1,1);
+
+                //console.log(key+" "+row+","+col);
+            }else{
+                var ans = "N/A";
+                var index = parseInt(data[j],10)-1;
+                
+                if(index==-1){
+                    $("#ans").html("無標記");
+                }else if(index>=0&&index<12){
+                    ans = anwsers[index];
+                    $("#ans").html(ans);
+                }else{
+                    err();
+                }
+                console.log(ans);
+            }
+        }
+    };
+
+    $("#render").click(function(){
+        var dataline = $("#dataline")[0].value;
+        draw(dataline);
+    });
+
+    $("#get_train").click(function(){
+        $.ajax({
+            url:"train/"+$("#train_line")[0].value
+        }).done(function(data){
+            draw(data);
+        }).fail(function(){
+            console.log("jizz");
+            err();
+        });
+    });
+    
+    $("#get_test1").click(function(){
+        $.ajax({
+            url:"test1/"+$("#test1_line")[0].value
+        }).done(function(data){
+            draw(data);
+        }).fail(function(){
+            console.log("jizz");
+            err();
+        });
+    });
+
+});
+
+</script>
+</body>
+</html>
